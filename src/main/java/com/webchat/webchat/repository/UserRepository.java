@@ -1,5 +1,7 @@
 package com.webchat.webchat.repository;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +20,9 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     public boolean existsByPhoneNumber(String phoneNumber);
 
     public User findByEmail(String email);
+
+    Optional<User> findByPhoneNumberAndEnabledTrue(String phoneNumber);
+
+    List<User> findByEnabledTrue();
+
 }

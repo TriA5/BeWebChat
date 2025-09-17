@@ -3,11 +3,18 @@ package com.webchat.webchat.security;
 public class Endpoints {
     public static final String font_end_host = "http://localhost:3000";
     public static final String[] PUBLIC_GET = {
+        "/users/**",
         "/user/active-account",
+        "/friendships/search/**", // đúng với API bạn gọi
+        "/friendships/**",
+        
+
     }; 
     public static final String[] PUBLIC_POST = {
         "/user/register",
-        "/user/authenticate"
+        "/user/authenticate",
+        "/friendships/send/**",
+        "/friendships/**",
     };
     public static final String[] PUBLIC_PUT = {
 

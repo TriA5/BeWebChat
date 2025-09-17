@@ -3,6 +3,7 @@ package com.webchat.webchat.service.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webchat.webchat.dto.UserRegisterDTO;
 import com.webchat.webchat.entity.Notification;
 import com.webchat.webchat.entity.Role;
 import com.webchat.webchat.entity.User;
@@ -47,45 +48,46 @@ public class UserServiceImp implements UserService{
     //     this.objectMapper = objectMapper;
     // }
     //
-    public ResponseEntity<?> register(User user) {
-        // Kiểm tra username đã tồn tại chưa
-        if (userRepository.existsByUsername(user.getUsername())) {
-            return ResponseEntity.badRequest().body(new Notification("Username đã tồn tại."));
-        }
-
-        // Kiểm tra email
-        if (userRepository.existsByEmail(user.getEmail())) {
-            return ResponseEntity.badRequest().body(new Notification("Email đã tồn tại."));
-        }
-        if (userRepository.existsByPhoneNumber(user.getPhoneNumber())) {
-            return ResponseEntity.badRequest().body(new Notification("Số điện thoại đã tồn tại."));
-        }
-        user.getDateOfBirth();
-        // Mã hoá mật khẩu
-        String encodePassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodePassword);
-
-        user.setAvatar("");
-
-        // Tạo mã kích hoạt cho người dùng
-        user.setActivationCode(generateActivationCode());
-        user.setEnabled(false);
-        user.setStatus(true);
-        user.setCreatedAt(java.time.LocalDateTime.now());
-        user.setUpdatedAt(java.time.LocalDateTime.now());
-        // Cho role mặc định
-        List<Role> roleList = new ArrayList<>();
-        roleList.add(roleRepository.findByNameRole("USER"));
-        user.setListRoles(roleList);
-
-        // Lưu vào database
-        userRepository.save(user);
-
-        // Gửi email cho người dùng để kích hoạt
-        sendEmailActivation(user.getEmail(),user.getActivationCode());
-
-        return ResponseEntity.ok("Đăng ký thành công!");
+    @Override
+@Transactional
+public ResponseEntity<?> register(UserRegisterDTO dto) {
+    if (userRepository.existsByUsername(dto.getUsername())) {
+        return ResponseEntity.badRequest().body(new Notification("Username đã tồn tại."));
     }
+    if (userRepository.existsByEmail(dto.getEmail())) {
+        return ResponseEntity.badRequest().body(new Notification("Email đã tồn tại."));
+    }
+    if (dto.getPhoneNumber() != null && userRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
+        return ResponseEntity.badRequest().body(new Notification("Số điện thoại đã tồn tại."));
+    }
+
+    User user = new User();
+    user.setUsername(dto.getUsername());
+    user.setEmail(dto.getEmail());
+    user.setPhoneNumber(dto.getPhoneNumber());
+    user.setGender(dto.getGender());
+    user.setFirstName(dto.getFirstName());
+    user.setLastName(dto.getLastName());
+    if (dto.getDateOfBirth() != null) {
+        user.setDateOfBirth(java.time.LocalDate.parse(dto.getDateOfBirth()));
+    }
+    user.setPassword(passwordEncoder.encode(dto.getPassword()));
+    user.setAvatar("");
+    user.setActivationCode(generateActivationCode());
+    user.setEnabled(false);
+    user.setStatus(true);
+    user.setCreatedAt(java.time.LocalDateTime.now());
+    user.setUpdatedAt(java.time.LocalDateTime.now());
+
+    List<Role> roleList = new ArrayList<>();
+    roleList.add(roleRepository.findByNameRole("USER"));
+    user.setListRoles(roleList);
+
+    userRepository.save(user);
+    sendEmailActivation(user.getEmail(), user.getActivationCode());
+
+    return ResponseEntity.ok("Đăng ký thành công!");
+}
     private String generateActivationCode() {
         return UUID.randomUUID().toString();
     }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -59,6 +60,9 @@ public class User {
 
     @Column(name = "enabled")
     private boolean enabled;
+    //giới tính
+    @Column(name = "gender")
+    private boolean gender; // true = Nam, false = Nữ
 
     // Mã kích hoạt
     @Column(name = "activation_code")
@@ -74,5 +78,12 @@ public class User {
 
     @ManyToMany(fetch = FetchType.EAGER,cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "id_user"), inverseJoinColumns = @JoinColumn(name = "id_role"))
+    @JsonManagedReference
     private List<Role> listRoles; // Danh sách role của user
+
+    //
+    public boolean getGender() {
+        return gender;
+    }
+    //
 }
