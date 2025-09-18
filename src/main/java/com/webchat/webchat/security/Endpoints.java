@@ -7,6 +7,8 @@ public class Endpoints {
         "/user/active-account",
         "/friendships/search/**", // đúng với API bạn gọi
         "/friendships/**",
+        "/ws/**",
+        "/chat/**",
         
 
     }; 
@@ -15,6 +17,8 @@ public class Endpoints {
         "/user/authenticate",
         "/friendships/send/**",
         "/friendships/**",
+        "/ws/**",
+        "/chat/**",
     };
     public static final String[] PUBLIC_PUT = {
 

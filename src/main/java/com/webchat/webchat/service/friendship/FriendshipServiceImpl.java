@@ -16,6 +16,7 @@ import com.webchat.webchat.entity.Friendship;
 import com.webchat.webchat.entity.User;
 import com.webchat.webchat.repository.FriendshipRepository;
 import com.webchat.webchat.repository.UserRepository;
+import com.webchat.webchat.service.chat.ChatService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,8 @@ public class FriendshipServiceImpl implements FriendshipService{
     private FriendshipRepository friendshipRepository;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private ChatService chatService;
 
     public UserDTO searchByPhone(String phone) {
     User user = userRepository.findByPhoneNumberAndEnabledTrue(phone)
@@ -116,6 +119,11 @@ public Friendship respondToRequest(UUID friendshipId, String action) {
 
     messagingTemplate.convertAndSend("/topic/friend-requests/" + saved.getRequester().getIdUser(), notification);
     messagingTemplate.convertAndSend("/topic/friend-requests/" + saved.getAddressee().getIdUser(), notification);
+
+    // If accepted, ensure a conversation exists and notify via /topic/conversations/{userId}
+    if ("ACCEPTED".equals(saved.getStatus())) {
+        chatService.ensureConversation(saved.getRequester().getIdUser(), saved.getAddressee().getIdUser());
+    }
 
     return saved;
 }

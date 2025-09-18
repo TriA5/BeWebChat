@@ -12,7 +12,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // client sẽ connect vào đây
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();
+        registry
+            .addEndpoint("/ws")
+            .setAllowedOriginPatterns(
+                "http://localhost:3000",
+                "http://127.0.0.1:3000"
+            )
+            .withSockJS();
     }
 
     @Override
