@@ -3,6 +3,7 @@ package com.webchat.webchat.service.user;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webchat.webchat.dto.UserProfileDTO;
 import com.webchat.webchat.dto.UserRegisterDTO;
 import com.webchat.webchat.entity.Notification;
 import com.webchat.webchat.entity.Role;
@@ -156,5 +157,92 @@ public ResponseEntity<?> register(UserRegisterDTO dto) {
         }
         return ResponseEntity.ok().build();
     }
-    
+    //Update Profile
+    @Override
+    public ResponseEntity<?> updateProfile(UserProfileDTO dto) {
+        try {
+            Optional<User> userOpt = userRepository.findById(dto.getIdUser());
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            User user = userOpt.get();
+            user.setFirstName(dto.getFirstName());
+            user.setLastName(dto.getLastName());
+            user.setPhoneNumber(dto.getPhoneNumber());
+            user.setDateOfBirth(dto.getDateOfBirth());
+            if (dto.getGender() != null) {
+                user.setGender(dto.getGender());
+            }
+            // if (dto.getAvatar() != null) {
+            //     user.setAvatar(dto.getAvatar());
+            // }
+            user.setUpdatedAt(java.time.LocalDateTime.now());
+
+            userRepository.save(user);
+
+            return ResponseEntity.ok("Cập nhật thông tin thành công!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Có lỗi xảy ra khi cập nhật thông tin");
+        }
+    }
+    // Quên mật khẩu
+    @Override
+    public ResponseEntity<?> forgotPassword(JsonNode jsonNode) {
+        try{
+            User user = userRepository.findByEmail(formatStringByJson(jsonNode.get("email").toString()));
+
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Đổi mật khẩu cho user
+            String passwordTemp = generateTemporaryPassword();
+            user.setPassword(passwordEncoder.encode(passwordTemp));
+            userRepository.save(user);
+
+            // Gửi email đê nhận mật khẩu
+            sendEmailForgotPassword(user.getEmail(), passwordTemp);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+    //quên mật khẩu
+        // private String generateActivationCode() {
+        //     return UUID.randomUUID().toString();
+        // }
+    private void sendEmailForgotPassword(String email, String password) {
+        String subject = "Reset mật khẩu";
+        String message = "Mật khẩu tạm thời của bạn là: <strong>" + password + "</strong>";
+        message += "<br/> <span>Vui lòng đăng nhập và đổi lại mật khẩu của bạn</span>";
+        try {
+            emailService.sendMessage("trithuanduong123@gmail.com", email, subject, message);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    //Charge Password
+    @Override
+    public ResponseEntity<?> changePassword(JsonNode userJson) {
+        try{
+            UUID idUser = UUID.fromString(formatStringByJson(String.valueOf(userJson.get("idUser"))));
+            String newPassword = formatStringByJson(String.valueOf(userJson.get("newPassword")));
+            System.out.println(idUser);
+            System.out.println(newPassword);
+            Optional<User> user = userRepository.findById(idUser);
+            user.get().setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user.get());
+        } catch (Exception e) {
+            e.printStackTrace();
+            ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+    private String generateTemporaryPassword() {
+        return RandomStringUtils.random(10, true, true);
+    }
 }

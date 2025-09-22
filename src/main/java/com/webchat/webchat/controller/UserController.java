@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.webchat.webchat.dto.UserProfileDTO;
 import com.webchat.webchat.dto.UserRegisterDTO;
 import com.webchat.webchat.entity.User;
 import com.webchat.webchat.repository.UserRepository;
@@ -92,6 +93,32 @@ public class UserController {
     public ResponseEntity<?> changeAvatar(@RequestBody JsonNode jsonData) {
         try{
             return userServiceImp.changeAvatar(jsonData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    //Update Profile
+    @PutMapping("/update-profile")
+    public ResponseEntity<?> updateProfile(@RequestBody UserProfileDTO dto) {
+        return userServiceImp.updateProfile(dto);
+    }
+    //Quên mật khẩu
+    @PutMapping(path = "/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody JsonNode jsonNode) {
+        try{
+            return userServiceImp.forgotPassword(jsonNode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    //Chage Password
+    @PutMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody JsonNode jsonData) {
+        System.out.println(jsonData);
+        try{
+            return userServiceImp.changePassword(jsonData);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
