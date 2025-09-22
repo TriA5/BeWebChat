@@ -8,6 +8,8 @@ import com.webchat.webchat.entity.User;
 
 public interface UserService {
     public ResponseEntity<?> register(UserRegisterDTO dto);
+    //Thay đổi ảnh đại diện
+    public ResponseEntity<?> changeAvatar(JsonNode userJson);
 
-    // public ResponseEntity<?> save(JsonNode userJson, String option);
+   
 }

@@ -9,9 +9,11 @@ import com.webchat.webchat.entity.Role;
 import com.webchat.webchat.entity.User;
 import com.webchat.webchat.repository.RoleRepository;
 import com.webchat.webchat.repository.UserRepository;
+import com.webchat.webchat.security.JwtResponse;
 import com.webchat.webchat.service.JWT.JwtService;
 import com.webchat.webchat.service.UploadImage.UploadImageService;
 import com.webchat.webchat.service.email.EmailService;
+import com.webchat.webchat.service.util.Base64ToMultipartFileConverter;
 
 import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -123,4 +125,36 @@ public ResponseEntity<?> register(UserRegisterDTO dto) {
     private String formatStringByJson(String json) {
         return json.replaceAll("\"", "");
     }
+    //Thay đổi ảnh đại diện
+    @Override
+    @Transactional
+    public ResponseEntity<?> changeAvatar(JsonNode userJson) {
+        try{
+            UUID idUser = UUID.fromString(formatStringByJson(String.valueOf(userJson.get("idUser"))));
+            String dataAvatar = formatStringByJson(String.valueOf(userJson.get("avatar")));
+
+            Optional<User> user = userRepository.findById(idUser);
+
+            // Xoá đi ảnh trước đó trong cloudinary
+            if (user.get().getAvatar().length() > 0) {
+                uploadImageService.deleteImage(user.get().getAvatar());
+            }
+
+            if (Base64ToMultipartFileConverter.isBase64(dataAvatar)) {
+                MultipartFile avatarFile = Base64ToMultipartFileConverter.convert(dataAvatar);
+                String avatarUrl = uploadImageService.uploadImage(avatarFile, "User_" + idUser);
+                user.get().setAvatar(avatarUrl);
+            }
+
+            User newUser =  userRepository.save(user.get());
+            final String jwtToken = jwtService.generateToken(newUser.getUsername());
+            return ResponseEntity.ok(new JwtResponse(jwtToken));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok().build();
+    }
+    
 }

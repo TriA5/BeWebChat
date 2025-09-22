@@ -21,7 +21,7 @@ public class Endpoints {
         "/chat/**",
     };
     public static final String[] PUBLIC_PUT = {
-
+        "/user/change-avatar"
     };
     public static final String[] PUBLIC_DELETE = {
 
