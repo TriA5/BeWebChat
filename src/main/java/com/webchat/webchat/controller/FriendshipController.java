@@ -63,4 +63,15 @@ public ResponseEntity<List<Friendship>> getAllFriendships(@PathVariable UUID use
         return ResponseEntity.badRequest().body(null);
     }
 }
+
+    // Hủy kết bạn
+    @PostMapping("/unfriend")
+    public ResponseEntity<?> unfriend(@RequestParam UUID userId, @RequestParam UUID friendId) {
+        try {
+            friendshipService.unfriend(userId, friendId);
+            return ResponseEntity.ok(Map.of("message", "Đã hủy kết bạn thành công"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

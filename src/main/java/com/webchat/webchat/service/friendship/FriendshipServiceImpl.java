@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -149,6 +148,42 @@ public List<User> getFriends(UUID userId) {
     }
 
     return friends;
+}
+
+@Override
+public void unfriend(UUID userId, UUID friendId) {
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Người dùng không tồn tại"));
+    User friend = userRepository.findById(friendId)
+            .orElseThrow(() -> new RuntimeException("Bạn bè không tồn tại"));
+
+    // Tìm friendship giữa 2 người (có thể theo cả 2 chiều)
+    Optional<Friendship> friendship1 = friendshipRepository.findByRequesterAndAddressee(user, friend);
+    Optional<Friendship> friendship2 = friendshipRepository.findByRequesterAndAddressee(friend, user);
+
+    Friendship toDelete = null;
+    if (friendship1.isPresent() && "ACCEPTED".equals(friendship1.get().getStatus())) {
+        toDelete = friendship1.get();
+    } else if (friendship2.isPresent() && "ACCEPTED".equals(friendship2.get().getStatus())) {
+        toDelete = friendship2.get();
+    }
+
+    if (toDelete == null) {
+        throw new RuntimeException("Không tìm thấy mối quan hệ bạn bè");
+    }
+
+    // Xóa friendship
+    friendshipRepository.delete(toDelete);
+
+    // Gửi thông báo qua WebSocket cho cả 2 người
+    FriendRequestNotification notification = new FriendRequestNotification(
+            toDelete.getId(),
+            friendId,
+            friend.getUsername(),
+            "UNFRIENDED"
+    );
+    messagingTemplate.convertAndSend("/topic/friend-requests/" + userId, notification);
+    messagingTemplate.convertAndSend("/topic/friend-requests/" + friendId, notification);
 }
 
 }

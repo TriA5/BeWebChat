@@ -22,11 +22,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
     }
 
     @Override
-    public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // prefix để client gửi request
-        registry.setApplicationDestinationPrefixes("/app");
-
-        // prefix để server publish event real-time
-        registry.enableSimpleBroker("/topic");
+     public void configureMessageBroker(MessageBrokerRegistry config) {
+        config.enableSimpleBroker("/topic");
+        config.setApplicationDestinationPrefixes("/app");
     }
 }

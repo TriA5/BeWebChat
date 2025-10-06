@@ -17,4 +17,6 @@ public interface FriendshipService {
 
     List<Friendship> getFriendships(UUID userId);
 
+    void unfriend(UUID userId, UUID friendId);
+
 }

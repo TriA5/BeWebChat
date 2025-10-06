@@ -245,4 +245,22 @@ public ResponseEntity<?> register(UserRegisterDTO dto) {
     private String generateTemporaryPassword() {
         return RandomStringUtils.random(10, true, true);
     }
+
+    public ResponseEntity<?> getUserById(UUID userId) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(new Notification("Người dùng không tồn tại"));
+        }
+        
+        User user = userOpt.get();
+        com.webchat.webchat.dto.BasicUserDTO dto = new com.webchat.webchat.dto.BasicUserDTO(
+            user.getIdUser(),
+            user.getUsername(),
+            user.getFirstName(),
+            user.getLastName(),
+            user.getAvatar()
+        );
+        
+        return ResponseEntity.ok(dto);
+    }
 }

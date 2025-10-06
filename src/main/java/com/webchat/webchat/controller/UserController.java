@@ -7,6 +7,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.webchat.webchat.dto.UserProfileDTO;
@@ -123,5 +125,11 @@ public class UserController {
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    //Get user by ID (for displaying names in group chat)
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserById(@PathVariable UUID userId) {
+        return userServiceImp.getUserById(userId);
     }
 }

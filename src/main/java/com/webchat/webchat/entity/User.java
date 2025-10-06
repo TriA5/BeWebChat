@@ -66,7 +66,7 @@ public class User {
 
     // Mã kích hoạt
     @Column(name = "activation_code")
-    private String activationCode; 
+    private String activationCode;
 
     // Thời điểm tạo
     @Column(name = "created_at", nullable = false, updatable = false)

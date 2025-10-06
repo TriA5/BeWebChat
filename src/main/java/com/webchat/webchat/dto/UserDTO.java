@@ -1,5 +1,6 @@
 package com.webchat.webchat.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -16,7 +17,10 @@ public class UserDTO {
     private String email;
     private String phoneNumber;
     private String avatar;
+    
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate dateOfBirth; 
+    
     private boolean gender;
 }
 
